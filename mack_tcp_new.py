@@ -19,10 +19,10 @@ class TCPListener:
         args = ['sudo', 'tcpdump', '-i', 'eth0', '-c', str(self.max_packets)]
         self.proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # print "self.proc.poll() is: ", self.proc.poll()
-        while self.proc.poll() is None:  # hopefully one day this will be fixed, this is always None
-            output = self.proc.stdout.readlines()
-            for thing in output:
-                callback(thing)
+        # while self.proc.poll() is None:  # hopefully one day this will be fixed, this is always None
+        output = self.proc.stdout.readlines()
+        for thing in output:
+            callback(thing)
 
 def my_callback(arg):
     global counter
