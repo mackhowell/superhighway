@@ -1,12 +1,19 @@
-#Packet sniffer in python
+#Mack Howell
+#Packet sniffer to GPIO
 #For Linux - Sniffs all incoming and outgoing packets :)
-#Silver Moon (m00n.silv3r@gmail.com)
 
+import RPi.GPIO as GPIO
+import time
 import socket
 import sys
-import re
 from struct import *
 
+# GPIO Setup Stuff
+ignition = 7
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(ignition, GPIO.OUT)
+current = GPIO.output(ignition, GPIO.LOW)
+previous = current
 
 def eth_addr(a):
     '''Convert a string of 6 characters of ethernet address into a dash separated hex string'''
@@ -24,9 +31,14 @@ except socket.error, msg:
 # receive a packet
 while True:
     packet = s.recvfrom(1024)
+    # event = packet.rstrip()
+    # print event
 
     #packet string from tuple
     packet = packet[0]
+    # while packet:
+    #     print "GOT ONE"
+    #     GPIO.output(7,GPIO.LOW)
 
     #parse ethernet header
     eth_length = 14
@@ -38,26 +50,26 @@ while True:
 
     #Parse IP packets, IP Protocol number = 8
     if eth_protocol is 8:
-        #Parse IP header
-        #take first 20 characters for the ip header
-        ip_header = packet[eth_length:20+eth_length]
+        print "GOT ONE"
+        GPIO.output(7,GPIO.HIGH)
 
-        #now unpack them :)
-        iph = unpack('!BBHHHBBH4s4s', ip_header)
+        # #Parse IP header
+        # #take first 20 characters for the ip header
+        # ip_header = packet[eth_length:20+eth_length]
+        # #now unpack them :)
+        # iph = unpack('!BBHHHBBH4s4s', ip_header)
+        # version_ihl = iph[0]
+        # version = version_ihl >> 4
+        # ihl = version_ihl & 0xF
+        # iph_length = ihl * 4
+        # ttl = iph[5]
+        # protocol = iph[6]
+    else:
+        GPIO.output(7, GPIO.LOW)
 
-        version_ihl = iph[0]
-        version = version_ihl >> 4
-        ihl = version_ihl & 0xF
-
-        iph_length = ihl * 4
-
-        ttl = iph[5]
-        protocol = iph[6]
-        s_addr = socket.inet_ntoa(iph[8])
-        d_addr = socket.inet_ntoa(iph[9])
 
         # pStream = str(protocol)
-        print 'PACKET: ' + str(protocol)
+        # print 'PACKET: ' + str(protocol)
 
         # # My Counter
         # nlinePat = re.compile(r'\n')
@@ -69,5 +81,11 @@ while True:
         #     nlineCounter += 1
         # print nlineCounter
 
-
-        # print 'Version : ' + str(version) + ' IP Header Length : ' + str(ihl) + ' TTL : ' + str(ttl) + ' Protocol : ' + str(protocol) + ' Source Address : ' + str(s_addr) + ' Destination Address : ' + str(d_addr)
+# # GPIO Output Stuff
+# while True:
+#     current = GPIO.input(ignition)
+#     if current != previous:
+#         printState(current)
+#     previous = current
+#     time.sleep(0.1)
+GPIO.cleanup()
